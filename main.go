@@ -9,12 +9,13 @@ func main() {
 
 	ServeMux := http.NewServeMux()
 
+	ServeMux.Handle("/", http.FileServer(http.Dir(".")))
+
 	serverStruct := &http.Server{
 		Addr:    ":8080",
 		Handler: ServeMux,
 	}
-	err := serverStruct.ListenAndServe()
-	if err != nil {
-		log.Fatal(err)
-	}
+
+	log.Fatal(serverStruct.ListenAndServe())
+
 }
