@@ -25,10 +25,16 @@ func (cfg *apiConfig) middleware(next http.Handler) http.Handler {
 }
 
 func (cfg *apiConfig) HandleMetrics(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Add("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	hit_num := cfg.fileserverHits.Load()
-	resp := fmt.Sprintf("Hits: %d", hit_num)
+	resp := fmt.Sprintf(`
+	<html>
+  		<body>
+    		<h1>Welcome, Chirpy Admin</h1>
+    		<p>Chirpy has been visited %d times!</p>
+  		</body>
+	</html>`, hit_num)
 	w.Write([]byte(resp))
 }
 
@@ -47,8 +53,8 @@ func main() {
 	handler := http.StripPrefix("/app", http.FileServer(http.Dir(".")))
 	ServeMux.Handle("/app/", apiCfg.middleware(handler))
 	ServeMux.HandleFunc("GET /api/healthz", handlerReadiness)
-	ServeMux.HandleFunc("GET /api/metrics", apiCfg.HandleMetrics)
-	ServeMux.HandleFunc("POST /api/reset", apiCfg.HandleReset)
+	ServeMux.HandleFunc("GET /admin/metrics", apiCfg.HandleMetrics)
+	ServeMux.HandleFunc("POST /admin/reset", apiCfg.HandleReset)
 
 	serverStruct := &http.Server{
 		Addr:    ":8080",
