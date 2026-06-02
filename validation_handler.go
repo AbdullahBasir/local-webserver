@@ -5,15 +5,28 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/AbdullahBasir/local-webserver/internal/database"
+	"github.com/google/uuid"
 )
 
-func chirpValidationHandler(w http.ResponseWriter, r *http.Request) {
+func getCleaned(body string, badWords map[string]struct{}) string {
+	wordSplit := strings.Split(body, " ")
+	for i, word := range wordSplit {
+		if _, ok := badWords[strings.ToLower(word)]; ok {
+			wordSplit[i] = "****"
+		}
+	}
+	cleaned := strings.Join(wordSplit, " ")
+	return cleaned
+}
+
+func (cfg *apiConfig) chirpWriter(w http.ResponseWriter, r *http.Request) {
 	type requestBody struct {
-		Body string `json:"body"`
+		Body   string    `json:"body"`
+		UserID uuid.UUID `json:"user_id"`
 	}
-	type returnVals struct {
-		Cleaned_body string `json:"cleaned_body"`
-	}
+
 	decoder := json.NewDecoder(r.Body)
 	reqBody := requestBody{}
 	err := decoder.Decode(&reqBody)
@@ -33,18 +46,19 @@ func chirpValidationHandler(w http.ResponseWriter, r *http.Request) {
 
 	cleaned := getCleaned(reqBody.Body, badWords)
 
-	respondWithJSON(w, 200, returnVals{
-		Cleaned_body: cleaned,
+	create_chirp, err := cfg.dbQueries.CreateChirp(r.Context(), database.CreateChirpParams{
+		Body:   cleaned,
+		UserID: reqBody.UserID,
 	})
-}
-
-func getCleaned(body string, badWords map[string]struct{}) string {
-	wordSplit := strings.Split(body, " ")
-	for i, word := range wordSplit {
-		if _, ok := badWords[strings.ToLower(word)]; ok {
-			wordSplit[i] = "****"
-		}
+	if err != nil {
+		respondWithError(w, 500, fmt.Sprintf("Failed to create chirp: %v", err))
+		return
 	}
-	cleaned := strings.Join(wordSplit, " ")
-	return cleaned
+	respondWithJSON(w, 201, Chirp{
+		ID:        create_chirp.ID,
+		CreatedAt: create_chirp.CreatedAt,
+		UpdatedAt: create_chirp.UpdatedAt,
+		Body:      create_chirp.Body,
+		UserID:    create_chirp.UserID,
+	})
 }
