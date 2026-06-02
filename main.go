@@ -6,6 +6,9 @@ import (
 	"net/http"
 	"os"
 	"sync/atomic"
+	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/AbdullahBasir/local-webserver/internal/database"
 	"github.com/joho/godotenv"
@@ -15,6 +18,13 @@ import (
 type apiConfig struct {
 	fileserverHits atomic.Int32
 	dbQueries      *database.Queries
+}
+
+type User struct {
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Email     string    `json:"email"`
 }
 
 func main() {
@@ -40,6 +50,7 @@ func main() {
 	ServeMux.HandleFunc("GET /admin/metrics", apiCfg.HandleMetrics)
 	ServeMux.HandleFunc("POST /admin/reset", apiCfg.HandleReset)
 	ServeMux.HandleFunc("POST /api/validate_chirp", chirpValidationHandler)
+	ServeMux.HandleFunc("POST /api/users", apiCfg.HandleCreateUser)
 
 	serverStruct := &http.Server{
 		Addr:    ":8080",
