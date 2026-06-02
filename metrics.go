@@ -3,15 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"sync/atomic"
-
-	"github.com/AbdullahBasir/local-webserver/internal/database"
 )
-
-type apiConfig struct {
-	fileserverHits atomic.Int32
-	dbQueries      *database.Queries
-}
 
 func (cfg *apiConfig) middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

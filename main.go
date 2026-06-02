@@ -5,11 +5,17 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync/atomic"
 
 	"github.com/AbdullahBasir/local-webserver/internal/database"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
+
+type apiConfig struct {
+	fileserverHits atomic.Int32
+	dbQueries      *database.Queries
+}
 
 func main() {
 
@@ -23,7 +29,10 @@ func main() {
 
 	ServeMux := http.NewServeMux()
 
-	apiCfg := &apiConfig{dbQueries: dbQueries}
+	apiCfg := apiConfig{
+		fileserverHits: atomic.Int32{},
+		dbQueries:      dbQueries,
+	}
 
 	handler := http.StripPrefix("/app", http.FileServer(http.Dir(".")))
 	ServeMux.Handle("/app/", apiCfg.middleware(handler))
