@@ -18,6 +18,7 @@ import (
 type apiConfig struct {
 	fileserverHits atomic.Int32
 	dbQueries      *database.Queries
+	Platform       string
 }
 
 type User struct {
@@ -42,6 +43,7 @@ func main() {
 	apiCfg := apiConfig{
 		fileserverHits: atomic.Int32{},
 		dbQueries:      dbQueries,
+		Platform:       os.Getenv("PLATFORM"),
 	}
 
 	handler := http.StripPrefix("/app", http.FileServer(http.Dir(".")))

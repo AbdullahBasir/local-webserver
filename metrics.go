@@ -27,7 +27,15 @@ func (cfg *apiConfig) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cfg *apiConfig) HandleReset(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
 	cfg.fileserverHits.Store(0)
+	if cfg.Platform != "dev" {
+		respondWithError(w, 403, "Forbidden")
+		return
+	}
+	err := cfg.dbQueries.ResetData(r.Context())
+	if err != nil {
+		respondWithError(w, 500, fmt.Sprintf("Failed to reset data: %v", err))
+		return
+	}
+	respondWithJSON(w, 200, struct{}{})
 }
