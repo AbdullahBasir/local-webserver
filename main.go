@@ -62,6 +62,7 @@ func main() {
 	ServeMux.HandleFunc("POST /api/users", apiCfg.HandleCreateUser)
 	ServeMux.HandleFunc("POST /api/chirps", apiCfg.chirpWriter)
 	ServeMux.HandleFunc("GET /api/chirps", apiCfg.RetrieveChirps)
+	ServeMux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.GetSingleChirp)
 
 	serverStruct := &http.Server{
 		Addr:    ":8080",
