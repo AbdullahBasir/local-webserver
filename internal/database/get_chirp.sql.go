@@ -12,12 +12,18 @@ import (
 )
 
 const getChirp = `-- name: GetChirp :one
-SELECT id FROM chirps WHERE id = $1
+SELECT id, created_at, updated_at, body, user_id FROM chirps WHERE id = $1
 `
 
-func (q *Queries) GetChirp(ctx context.Context, id uuid.UUID) (uuid.UUID, error) {
+func (q *Queries) GetChirp(ctx context.Context, id uuid.UUID) (Chirp, error) {
 	row := q.db.QueryRowContext(ctx, getChirp, id)
-	var id_2 uuid.UUID
-	err := row.Scan(&id_2)
-	return id_2, err
+	var i Chirp
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Body,
+		&i.UserID,
+	)
+	return i, err
 }

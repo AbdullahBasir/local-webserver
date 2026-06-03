@@ -1,2 +1,2 @@
 -- name: GetChirp :one
-SELECT id FROM chirps WHERE id = $1;
+SELECT * FROM chirps WHERE id = $1;
