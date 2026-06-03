@@ -4,11 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/AbdullahBasir/local-webserver/internal/auth"
+	"github.com/AbdullahBasir/local-webserver/internal/database"
 )
 
 func (cfg *apiConfig) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		Email string `json:"email"`
+		Password string `json:"password"`
+		Email    string `json:"email"`
 	}
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
@@ -17,7 +21,17 @@ func (cfg *apiConfig) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, 400, fmt.Sprintf("Invalid request body: %v", err))
 		return
 	}
-	create_user, err := cfg.dbQueries.CreateUser(r.Context(), params.Email)
+
+	hashedPassword, err := auth.HashPassword(params.Password)
+	if err != nil {
+		respondWithError(w, 500, fmt.Sprintf("Failed to hash password: %v", err))
+		return
+	}
+
+	create_user, err := cfg.dbQueries.CreateUser(r.Context(), database.CreateUserParams{
+		Email:    params.Email,
+		Password: hashedPassword,
+	})
 	if err != nil {
 		respondWithError(w, 500, fmt.Sprintf("Failed to create user: %v", err))
 		return
