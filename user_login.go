@@ -21,8 +21,9 @@ func (cfg *apiConfig) HandleUserLogin(w http.ResponseWriter, r *http.Request) {
 		CreatedAt time.Time `json:"created_at"`
 		UpdatedAt time.Time `json:"updated_at"`
 		Email     string    `json:"email"`
-		Token     string
+		Token     string    `json:"token"`
 	}
+
 	params := parameters{}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&params)
@@ -53,7 +54,7 @@ func (cfg *apiConfig) HandleUserLogin(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, 500, "Internal Server Error")
 	}
 
-	respondWithJSON(w, 200, User{
+	respondWithJSON(w, 200, userToken{
 		ID:        user.ID,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,

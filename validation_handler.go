@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/AbdullahBasir/local-webserver/internal/auth"
 	"github.com/AbdullahBasir/local-webserver/internal/database"
 	"github.com/google/uuid"
 )
@@ -46,9 +47,21 @@ func (cfg *apiConfig) chirpWriter(w http.ResponseWriter, r *http.Request) {
 
 	cleaned := getCleaned(reqBody.Body, badWords)
 
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, 401, "Unauthorized Token")
+		return
+	}
+
+	userID, err := auth.ValidateJWT(token, cfg.Secret)
+	if err != nil {
+		respondWithError(w, 401, "Unauthorized Token")
+		return
+	}
+
 	create_chirp, err := cfg.dbQueries.CreateChirp(r.Context(), database.CreateChirpParams{
 		Body:   cleaned,
-		UserID: reqBody.UserID,
+		UserID: userID,
 	})
 	if err != nil {
 		respondWithError(w, 500, fmt.Sprintf("Failed to create chirp: %v", err))
