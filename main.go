@@ -19,6 +19,7 @@ type apiConfig struct {
 	fileserverHits atomic.Int32
 	dbQueries      *database.Queries
 	Platform       string
+	Secret         string
 }
 
 type User struct {
@@ -53,6 +54,7 @@ func main() {
 		fileserverHits: atomic.Int32{},
 		dbQueries:      dbQueries,
 		Platform:       os.Getenv("PLATFORM"),
+		Secret:         os.Getenv("JWT_SECRET"),
 	}
 
 	handler := http.StripPrefix("/app", http.FileServer(http.Dir(".")))
