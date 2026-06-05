@@ -50,21 +50,36 @@ type RefreshToken struct {
 func main() {
 
 	godotenv.Load()
+
 	dbURL := os.Getenv("DB_URL")
+	if dbURL == "" {
+		log.Fatal("DB_URL must be set")
+	}
+
+	platform := os.Getenv("PLATFORM")
+	if platform == "" {
+		log.Fatal("PLATFORM must be set")
+	}
+
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		log.Fatal("JWT_SECRET environment variable is not set")
+	}
+
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	dbQueries := database.New(db)
 
-	ServeMux := http.NewServeMux()
-
 	apiCfg := apiConfig{
 		fileserverHits: atomic.Int32{},
 		dbQueries:      dbQueries,
-		Platform:       os.Getenv("PLATFORM"),
-		Secret:         os.Getenv("JWT_SECRET"),
+		Platform:       platform,
+		Secret:         jwtSecret,
 	}
+
+	ServeMux := http.NewServeMux()
 
 	handler := http.StripPrefix("/app", http.FileServer(http.Dir(".")))
 	ServeMux.Handle("/app/", apiCfg.middleware(handler))
@@ -76,6 +91,7 @@ func main() {
 	ServeMux.HandleFunc("GET /api/chirps", apiCfg.RetrieveChirps)
 	ServeMux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.GetSingleChirp)
 	ServeMux.HandleFunc("POST /api/login", apiCfg.HandleUserLogin)
+	ServeMux.HandleFunc("POST /api/refresh", apiCfg.CreateRefreshToken)
 
 	serverStruct := &http.Server{
 		Addr:    ":8080",
