@@ -43,11 +43,19 @@ Http status numbers and their methods:
 5xx = server error
 
 Used in this project:
+
 200. http.StatusOK                      OK — request succeeded
+
 201. http.StatusCreated                 Created — resource was created
+
 204. http.StatusNoContent               No Content — success, no response body
+
 400. http.StatusBadRequest              Bad Request — malformed request
+
 401. http.StatusUnauthorized            Unauthorized — missing/invalid auth
+
 403. http.StatusForbidden               Forbidden — authenticated, but not allowed
+
 404. http.StatusNotFound                Not Found — resource doesn’t exist
+
 500. http.StatusInternalServerError     Internal Server Error — server broke while handling request
