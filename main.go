@@ -94,6 +94,7 @@ func main() {
 	ServeMux.HandleFunc("POST /api/chirps", apiCfg.chirpWriter)
 	ServeMux.HandleFunc("GET /api/chirps", apiCfg.RetrieveChirps)
 	ServeMux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.GetSingleChirp)
+	ServeMux.HandleFunc("DELETE /api/chirps/{chirpID}", apiCfg.DeleteSingleChirp)
 
 	ServeMux.HandleFunc("POST /api/login", apiCfg.HandleUserLogin)
 	ServeMux.HandleFunc("POST /api/refresh", apiCfg.CreateRefreshToken)
