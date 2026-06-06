@@ -53,11 +53,16 @@ func (cfg *apiConfig) HandleUserLogin(w http.ResponseWriter, r *http.Request) {
 		UserID:    user.ID,
 		ExpiresAt: time.Now().Add(exp),
 	})
+	if err != nil {
+		respondWithError(w, 401, "Unauthorized Token")
+		return
+	}
 
 	expire := 1 * int(time.Hour)
 	jwt, err := auth.MakeJWT(user.ID, cfg.Secret, time.Duration(expire))
 	if err != nil {
 		respondWithError(w, 500, "Internal Server Error")
+		return
 	}
 
 	respondWithJSON(w, 200, responseBody{
