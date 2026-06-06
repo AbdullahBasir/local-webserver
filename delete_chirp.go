@@ -10,38 +10,38 @@ import (
 func (cfg *apiConfig) DeleteSingleChirp(w http.ResponseWriter, r *http.Request) {
 	token, err := auth.GetBearerToken(r.Header)
 	if err != nil {
-		respondWithError(w, 401, "Unauthorized, unable to get token from Header")
+		respondWithError(w, http.StatusUnauthorized, "Unauthorized, unable to get token from Header")
 		return
 	}
 
 	id := r.PathValue("chirpID")
 	parseID, err := uuid.Parse(id)
 	if err != nil {
-		respondWithError(w, 400, "ID unable to be decoded")
+		respondWithError(w, http.StatusBadRequest, "ID unable to be decoded")
 		return
 	}
 
 	chirp, err := cfg.dbQueries.GetChirp(r.Context(), parseID)
 	if err != nil {
-		respondWithError(w, 404, "Chirp not found")
+		respondWithError(w, http.StatusNotFound, "Chirp not found")
 		return
 	}
 
 	user, err := auth.ValidateJWT(token, cfg.Secret)
 	if err != nil {
-		respondWithError(w, 401, "Unauthorized Token")
+		respondWithError(w, http.StatusUnauthorized, "Unauthorized Token")
 		return
 	}
 
 	if chirp.UserID != user {
-		respondWithError(w, 403, "Invalid authorization to delete")
+		respondWithError(w, http.StatusForbidden, "Invalid authorization to delete")
 		return
 	}
 
 	err = cfg.dbQueries.DeleteChirp(r.Context(), parseID)
 	if err != nil {
-		respondWithError(w, 500, "Failed to delete chirp")
+		respondWithError(w, http.StatusInternalServerError, "Failed to delete chirp")
 		return
 	}
-	w.WriteHeader(204)
+	w.WriteHeader(http.StatusNoContent)
 }
