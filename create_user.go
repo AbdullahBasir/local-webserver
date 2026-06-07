@@ -38,10 +38,11 @@ func (cfg *apiConfig) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, 201, User{
-		ID:        create_user.ID,
-		CreatedAt: create_user.CreatedAt,
-		UpdatedAt: create_user.UpdatedAt,
-		Email:     create_user.Email,
+		ID:          create_user.ID,
+		CreatedAt:   create_user.CreatedAt,
+		UpdatedAt:   create_user.UpdatedAt,
+		Email:       create_user.Email,
+		IsChirpyRed: create_user.IsChirpyRed,
 	})
 
 }
