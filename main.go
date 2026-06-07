@@ -23,11 +23,12 @@ type apiConfig struct {
 }
 
 type User struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Email     string    `json:"email"`
-	Password  string    `json:"-"`
+	ID          uuid.UUID `json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Email       string    `json:"email"`
+	Password    string    `json:"-"`
+	IsChirpyRed bool      `json:"is_chirpy_red"`
 }
 
 type Chirp struct {
@@ -90,6 +91,7 @@ func main() {
 
 	ServeMux.HandleFunc("POST /api/users", apiCfg.HandleCreateUser)
 	ServeMux.HandleFunc("PUT /api/users", apiCfg.UpdateInfo)
+	ServeMux.HandleFunc("POST /api/polka/webhooks", apiCfg.WebhookEvent)
 
 	ServeMux.HandleFunc("POST /api/chirps", apiCfg.chirpWriter)
 	ServeMux.HandleFunc("GET /api/chirps", apiCfg.RetrieveChirps)
